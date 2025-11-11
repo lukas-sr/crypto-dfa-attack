@@ -137,31 +137,27 @@ def DFA():
     for i in range(16):
         print("Byte #{}: {}".format(i, [f"{k:02x}" for k in K10_candidates[i]]))
 
-    # catch the first candidate for each byte
-    K10_test_1 = np.array([c[0] for c in K10_candidates])
-    master_key_from_k10 = InvKeyExpansion(K10_test_1, 10)
-    master_key_from_k10 = np.array(master_key_from_k10, dtype=np.uint8)
+    # 1st candidate test
+    K10_test_1 = np.array([c[0] for c in K10_candidates], dtype=np.uint8)
+    master_key_1 = np.array(InvKeyExpansion(K10_test_1, 10), dtype=np.uint8)
 
-    c_test_1 = Cipher(master_key_from_k10, Ma)
+    for M, C, label in [(Ma, Ca, "A"), (Mb, Cb, "B"), (Mc, Cc, "C")]:
+        c_test = Cipher(master_key_1, M)
+        print(f"\nPlaintext M{label}: {M}")
+        print(f"Expected  C{label}: {C}")
+        print(f"Recovered C{label}: {c_test}")
+        print(f"Match: {np.array_equal(c_test, C)}")
 
-    if (c_test_1 == Ca).all():
-        print("\nFirst candidate is correct:")
-        print(master_key_from_k10)
-        print("Ciphertext with recovered key:")
-        print(c_test_1)
-
-    # for the test_2, only byte 2 has two candidates in the example
+    # 2nd candidate test
     K10_test_2 = K10_test_1.copy()
     K10_test_2[2] = K10_candidates[2][1]
-    master_key_from_k10 = InvKeyExpansion(K10_test_2, 10)
-    master_key_from_k10 = np.array(master_key_from_k10, dtype=np.uint8)
-    c_test_2 = Cipher(master_key_from_k10, Ma)
+    master_key_2 = np.array(InvKeyExpansion(K10_test_2, 10), dtype=np.uint8)
 
-    if (c_test_2 == Ca).all():
-        print("\nSecond candidate is correct:")
-        print(master_key_from_k10)
-        print("Ciphertext with recovered key:")
-        print(c_test_2)
+    for M, C, label in [(Ma, Ca, "A"), (Mb, Cb, "B"), (Mc, Cc, "C")]:
+        c_test = Cipher(master_key_2, M)
+        print(f"\nPlaintext M{label}: {M}")
+        print(f"Expected  C{label}: {C}")
+        print(f"Recovered C{label}: {c_test}")
+        print(f"Match: {np.array_equal(c_test, C)}")
 
-# Test_AES()
 DFA()
